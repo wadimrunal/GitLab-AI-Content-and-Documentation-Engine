@@ -1,281 +1,521 @@
 # GitLab AI Content & Documentation Engine
 
-An AI-powered content production platform that turns technical inputs — code changes, product briefs, API specs, and release notes — into review-ready documentation, release notes, and developer blogs, through a governed multi-agent workflow with human approval at every stage.
-
-<!--
-  📸 SCREENSHOT: add a hero screenshot or short GIF of the app here
-  (recommended: the home page or the dashboard). Save it to
-  docs/screenshots/hero.png and reference it like this:
-  ![App overview](docs/screenshots/hero.png)
--->
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Screenshots](#screenshots)
-- [Tech Stack](#tech-stack)
-- [Folder Structure](#folder-structure)
-- [Content Workflow](#content-workflow)
-- [User Roles](#user-roles)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [API Reference](#api-reference)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Team](#team)
-
----
+> Turn technical changes into source-grounded, review-ready documentation with a multi-agent AI workflow.
 
 ## Overview
 
-Product releases move faster than documentation can keep up. The **AI Content & Documentation Engine** closes that gap: a writer submits a content request, a five-agent AI crew drafts and refines it, and the content moves through a controlled review chain — **Technical Reviewer → Doc Lead → Admin** — before it's published. Every step is logged, every draft is versioned, and nothing goes live without a human sign-off.
+The **GitLab AI Content & Documentation Engine** helps teams transform technical inputs such as code changes, release notes, API specifications, issue context, and existing documentation into structured content drafts.
 
-## Key Features
+Instead of asking one AI agent to generate everything at once, the system separates the work into focused stages:
 
-- **Multi-agent AI drafting** — five specialized CrewAI agents (context reading, writing, technical review, tone optimization, publishing prep) turn raw technical input into a structured draft
-- **Source-grounded content** — drafts carry `source_references` back to the material they were generated from
-- **Role-based review workflow** — Writer → Technical Reviewer → Doc Lead → Admin, each with scoped permissions
-- **Version history** — every regenerated draft is saved, nothing is overwritten
-- **Retrieval-augmented context** — a Chroma vector store surfaces relevant prior docs and style guidance before drafting starts
-- **Audit logging** — every job creation, review action, and publish event is recorded
-- **Published document viewer** — a clean, read-only page for anyone to read a published document
-- **Admin dashboard** — pipeline health, pending reviews, and one-click publish
+**Context → Draft → Technical Review → Tone & Structure → Human Review → Publish**
 
-## Screenshots
+The goal is simple: **reduce documentation effort without removing technical and editorial control.**
 
-<!--
-  📸 ADD YOUR SCREENSHOTS HERE. Suggested shots to capture, in order:
-    1. Home / landing page
-    2. Login page
-    3. Content intake form (Generate page)
-    4. Draft editor with a generated draft
-    5. Review panel (Accept / Request Revision / Reject)
-    6. Admin dashboard ("Ready to Publish" section)
-    7. Published document viewer page
+---
 
-  Save files under docs/screenshots/ using the names below, and these
-  links will render automatically once the images exist.
--->
+## Why this project?
 
-| | |
+Technical changes often arrive before their documentation is ready. Engineers may have the code change, product teams may have release context, and writers may have existing documentation — but that information is spread across different sources.
+
+This project brings those inputs together and creates a controlled path from technical change to review-ready content.
+
+### What it helps with
+
+- Converting technical changes into documentation drafts
+- Keeping generated content grounded in supplied source material
+- Reusing relevant existing documentation and knowledge
+- Separating technical validation from writing and tone refinement
+- Keeping a human reviewer in the approval loop
+- Maintaining draft/version context throughout the workflow
+
+---
+
+## How it works
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "11px"
+  },
+  "flowchart": {
+    "nodeSpacing": 20,
+    "rankSpacing": 25,
+    "padding": 5
+  }
+}}%%
+
+flowchart TD
+
+    A["Technical Inputs<br/>Code changes • Notes • API specs • Existing docs"]
+    B["Context Preparation<br/>Extract facts • Organize sources • Retrieve context"]
+    C["AI Content Workflow<br/>Draft • Technical Review • Tone • Structure"]
+    D["Review-Ready Draft<br/>Sources • Flags • Version"]
+    E["Human Review<br/>Approve or Request Changes"]
+    F["Publishing Preparation<br/>Export approved content"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E -->|Changes requested| C
+    E -->|Approved| F
+
+    classDef stage fill:#EEF2FF,stroke:#6366F1,color:#1E1B4B,stroke-width:1px;
+    classDef review fill:#FEF3C7,stroke:#F59E0B,color:#78350F,stroke-width:1px;
+    classDef output fill:#ECFDF5,stroke:#10B981,color:#064E3B,stroke-width:1px;
+
+    class A,B,C stage;
+    class E review;
+    class D,F output;
+```
+
+### Typical input
+
+A content request can combine:
+
+- Code changes / diffs
+- Release or product notes
+- API specifications
+- Issue or feature context
+- Existing documentation
+- Content type and audience requirements
+
+### Typical output
+
+Depending on the request, the workflow can prepare:
+
+- Release notes
+- Technical documentation
+- Developer-facing blogs
+- Onboarding content
+- API documentation
+
+---
+
+## Multi-Agent Workflow
+
+Each stage has a focused responsibility instead of relying on a single generation step.
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "11px"
+  },
+  "flowchart": {
+    "nodeSpacing": 20,
+    "rankSpacing": 25,
+    "padding": 5
+  }
+}}%%
+
+flowchart TD
+
+    I["Input Analysis"]
+    C["Context Reader"]
+    W["Documentation Writer"]
+    R["Technical Reviewer"]
+    T["Tone Optimizer"]
+    S["Structure & Content Refinement"]
+    H["Human Review"]
+    P["Publishing Preparation"]
+
+    I --> C
+    C --> W
+    W --> R
+    R --> T
+    T --> S
+    S --> H
+    H -->|Revise| W
+    H -->|Approve| P
+
+    classDef stage fill:#EEF2FF,stroke:#6366F1,color:#1E1B4B,stroke-width:1px;
+    classDef review fill:#FEF3C7,stroke:#F59E0B,color:#78350F,stroke-width:1px;
+    classDef output fill:#ECFDF5,stroke:#10B981,color:#064E3B,stroke-width:1px;
+
+    class I,C,W,R,T,S stage;
+    class H review;
+    class P output;
+```
+
+| Stage | Responsibility |
 |---|---|
-| **Home page** | ![Home page](docs/screenshots/home.png) |
-| **Content intake** | ![Content intake](docs/screenshots/generate.png) |
-| **Draft & review** | ![Draft review](docs/screenshots/draft-review.png) |
-| **Admin dashboard** | ![Admin dashboard](docs/screenshots/dashboard.png) |
-| **Published viewer** | ![Published viewer](docs/screenshots/published.png) |
+| **Context Reader** | Understands the supplied material, extracts relevant facts, and identifies missing context. |
+| **Documentation Writer** | Creates the first structured draft using the prepared context. |
+| **Technical Reviewer** | Checks whether technical claims remain supported by the available source material. |
+| **Tone Optimizer** | Adjusts language for the selected audience and content type. |
+| **Refinement** | Improves structure, clarity, headings, examples, and overall readability. |
+| **Human Review** | Final review and approval before publishing. |
 
-> **Where to add screenshots:** create a `docs/screenshots/` folder in the repository root (if it doesn't already exist) and drop your `.png`/`.jpg` files there using the filenames above. GitHub/GitLab renders them automatically wherever they're referenced in this file — no extra setup needed.
+---
+
+## Architecture
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "11px"
+  },
+  "flowchart": {
+    "nodeSpacing": 20,
+    "rankSpacing": 25,
+    "padding": 5
+  }
+}}%%
+
+flowchart TD
+
+    subgraph UI["Application"]
+        Intake["Content Intake"]
+        Context["Context Review"]
+        Workflow["Workflow Monitor"]
+        Editor["Draft Editor"]
+        Review["Review"]
+    end
+
+    subgraph API["Backend"]
+        Jobs["Content Job Management"]
+        Assembly["Context Assembly"]
+        Orchestration["Agent Orchestration"]
+        Versions["Draft & Version Management"]
+    end
+
+    subgraph AI["AI & Knowledge"]
+        Retrieval["Retrieval / Knowledge"]
+        Agents["CrewAI Agents"]
+        LLM["LLM"]
+    end
+
+    subgraph Storage["Storage"]
+        SQL["PostgreSQL / Supabase"]
+        Vector["Chroma / Vector Store"]
+    end
+
+    Intake --> Jobs
+    Context --> Assembly
+    Workflow --> Orchestration
+    Editor --> Versions
+    Review --> Versions
+
+    Jobs --> Assembly
+    Assembly --> Retrieval
+    Retrieval --> Vector
+    Assembly --> Orchestration
+    Orchestration --> Agents
+    Agents --> LLM
+    Agents --> Versions
+    Versions --> SQL
+
+    classDef stage fill:#EEF2FF,stroke:#6366F1,color:#1E1B4B,stroke-width:1px;
+    classDef review fill:#FEF3C7,stroke:#F59E0B,color:#78350F,stroke-width:1px;
+    classDef output fill:#ECFDF5,stroke:#10B981,color:#064E3B,stroke-width:1px;
+
+    class Intake,Context,Workflow,Editor,Jobs,Assembly stage;
+    class Review,Orchestration,Agents review;
+    class Retrieval,LLM,Versions,SQL,Vector output;
+```
+
+### Architecture responsibilities
+
+**Frontend / UI**
+- Collects content requests and source files
+- Displays context and workflow progress
+- Provides the draft and review experience
+
+**Backend**
+- Handles content jobs and inputs
+- Builds the context package
+- Coordinates the agent workflow
+- Stores draft/version information
+
+**AI layer**
+- Runs specialized content agents
+- Uses retrieved context when relevant
+- Produces structured intermediate and final outputs
+
+**Knowledge / Retrieval**
+- Makes existing documentation, terminology, examples, and other approved context searchable
+
+**Database**
+- Stores operational records such as jobs, drafts, sources, review information, and workflow state
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14, React 18, Tailwind CSS, Framer Motion |
-| Backend / API | FastAPI, Uvicorn, Pydantic |
-| Agent Orchestration | CrewAI |
-| LLM | Gemini API |
-| Vector Retrieval | ChromaDB |
-| Database | PostgreSQL (via Supabase) / SQLAlchemy |
-| Auth | Custom email/password + role-based access |
-| Integrations | GitLab API (`python-gitlab`) |
+| **Backend API** | FastAPI |
+| **AI Orchestration** | CrewAI |
+| **LLM** | Gemini |
+| **Retrieval / Vector Store** | Chroma |
+| **Operational Database** | PostgreSQL / Supabase |
+| **ORM / Database Access** | SQLAlchemy |
+| **Configuration** | Python `.env` configuration |
+| **Frontend** | Project web interface |
 
-## Folder Structure
+> The exact frontend/deployment configuration can vary with the environment. Backend and AI components above reflect the project's implementation direction.
 
-```
-main/
-├── Backend/
-│   ├── main.py                # FastAPI app — all API routes
-│   ├── models.py               # Pydantic request/response schemas
-│   ├── agents/
-│   │   └── crew.py             # CrewAI 5-agent content workflow
-│   ├── auth/                   # Login, signup, verification, sessions
-│   ├── database/
-│   │   ├── crud.py             # Job/user CRUD helpers
-│   │   ├── models_db.py        # SQLAlchemy models
-│   │   └── audit_log.py        # Structured audit logging
-│   ├── retrieval/
-│   │   ├── chroma_store.py     # Vector store setup
-│   │   └── ingest_knowledge.py # Load style guides/templates into Chroma
-│   └── services/
-│       ├── context_builder.py  # Builds context packs for agents
-│       └── gitlab_service.py   # GitLab repository integration
+---
+
+## Project Structure
+
+The repository is organized around the major application responsibilities rather than placing the entire workflow in a single module.
+
+```text
+gitlab-ai-content-engine/
 │
-├── Frontend/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── login/ signup/      # Auth pages
-│   │   ├── generate/           # Content intake form
-│   │   ├── drafts/             # Draft list + review workspace
-│   │   ├── documents/[status]/ # Documents filtered by status
-│   │   ├── published/[job_id]/ # Read-only published document viewer
-│   │   └── dashboard/          # Role-specific dashboards
-│   └── components/
-│       ├── home/                # Landing page sections
-│       ├── drafts/               # Draft editor, review panel
-│       ├── dashboard/ analytics/ # Dashboard widgets, charts
-│       └── layout/               # Navbar, shared layout
+├── backend/
+│   ├── agents/
+│   │   └── crew.py              # Multi-agent workflow
+│   ├── retrieval/
+│   │   └── chroma_store.py      # Vector retrieval
+│   ├── auth/                    # Authentication-related logic
+│   ├── database/                # Database configuration / models
+│   ├── services/                # Application services
+│   ├── chroma_data/             # Retrieval data where used
+│   ├── main.py                  # FastAPI application entry point
+│   ├── models.py                # Application models
+│   └── requirements.txt         # Backend dependencies
+│
+├── frontend/
+│   └── ...                      # Web application
 │
 ├── data/
-│   ├── sample_inputs/          # Example technical inputs
-│   ├── sample_docs/             # Example existing docs (for retrieval)
-│   ├── style_guides/            # GitLab voice/style guidance
-│   └── content_templates/       # Reusable content templates
-│
-├── docs/
-│   ├── architecture.md
-│   ├── api_documentation.md
-│   ├── workflow_states.md
-│   ├── demo_script.md
-│   └── screenshots/             # 📸 add screenshots here
+│   ├── sample_inputs/           # Example technical inputs
+│   ├── sample_docs/             # Example documentation
+│   ├── style_guides/            # Writing/style context
+│   └── content_templates/       # Content templates
 │
 ├── tests/
 │   ├── functional_tests/
 │   ├── ai_output_tests/
 │   └── edge_cases/
 │
-└── deployment/
-    ├── vercel_notes.md
-    ├── backend_deployment.md
-    └── environment_setup.md
+├── docs/
+│   └── readme_assets/            # README diagrams
+│
+├── .env.example
+└── README.md
 ```
 
-## Content Workflow
-
-A content job moves through the following statuses:
-
-```
-intake → drafting → ready_for_human_review → doc_lead_review → approved → published
-                          │                        │
-                          ▼                        ▼
-                        failed                   failed   (on reject)
-                          │                        │
-                          ▼                        ▼
-                      drafting                  drafting   (on request_revision)
-```
-
-| Status | Meaning | Who acts next |
-|---|---|---|
-| `intake` | Job created, AI not yet run | — |
-| `drafting` | AI agents generating the draft | — |
-| `ready_for_human_review` | Draft ready | Technical Reviewer |
-| `doc_lead_review` | Passed technical review | Doc Lead |
-| `approved` | Doc Lead accepted | Admin |
-| `published` | Live and readable | — |
-| `failed` | Rejected, or the AI workflow errored | Writer (resubmits) |
-
-See [`docs/workflow_states.md`](docs/workflow_states.md) for the full reference.
-
-## User Roles
-
-| Role | Can do |
-|---|---|
-| **Writer** | Create content jobs, run the AI workflow, submit drafts for review |
-| **Technical Reviewer** | Accept / reject / request revision on drafts in `ready_for_human_review` |
-| **Doc Lead** | Accept / reject / request revision on drafts in `doc_lead_review` |
-| **Admin** | Publish approved documents, delete jobs, manage users, view all analytics |
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- A PostgreSQL database (e.g. a free [Supabase](https://supabase.com) project)
-- A [Gemini API key](https://aistudio.google.com/app/apikey)
-
-### 1. Backend setup
-
-```bash
-cd Backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-cp .env.example .env            # then fill in GEMINI_API_KEY and DATABASE_URL
-
-uvicorn main:app --reload
-```
-
-Backend runs at `http://127.0.0.1:8000` — visit `/docs` for the interactive API explorer.
-
-### 2. Frontend setup
-
-```bash
-cd Frontend
-npm install
-npm run dev
-```
-
-Frontend runs at `http://localhost:3000`.
-
-## Environment Variables
-
-Set these in `Backend/.env` (see `Backend/.env.example`):
-
-| Variable | Description |
-|---|---|
-| `GEMINI_API_KEY` | Gemini API key used by the CrewAI agents |
-| `GOOGLE_API_KEY` | Same key, some libraries read this name instead |
-| `DATABASE_URL` | PostgreSQL connection string (Supabase: Project Settings → Database → Connection string) |
-
-<!--
-  🔗 DEPLOYMENT: once deployed, add the live links here:
-  - Frontend: https://your-app.vercel.app
-  - Backend:  https://your-api.onrender.com
--->
-
-## API Reference
-
-| Endpoint | Purpose |
-|---|---|
-| `POST /api/content-jobs` | Create a new content job |
-| `POST /api/agent-workflow/run` | Run the 5-agent drafting workflow |
-| `GET /api/content-jobs/{job_id}` | Fetch a job's full state |
-| `POST /api/drafts/{job_id}/review` | Accept / reject / request revision |
-| `POST /api/publish/export` | Publish an approved document (Admin only) |
-| `GET /api/metrics` | Pipeline throughput and status counts |
-| `GET /api/dashboard` | Role-specific dashboard data |
-
-Full request/response shapes are in [`docs/api_documentation.md`](docs/api_documentation.md) and the live `/docs` explorer.
-
-## Testing
-
-```bash
-cd tests
-pytest functional_tests/
-pytest ai_output_tests/
-pytest edge_cases/
-```
-
-## Deployment
-
-- **Frontend** — deploy `Frontend/` to [Vercel](https://vercel.com) (see [`deployment/vercel_notes.md`](deployment/vercel_notes.md))
-- **Backend** — deploy `Backend/` to [Render](https://render.com) or [Railway](https://railway.app) (see [`deployment/backend_deployment.md`](deployment/backend_deployment.md))
-- **Database** — hosted on [Supabase](https://supabase.com)
-
-<!--
-  🎥 DEMO VIDEO: once recorded, add the Google Drive link here
-  (make sure sharing is set to "Anyone with the link can view").
--->
-
-## Team
-
-<!--
-  👥 TEAM: list each teammate and what they owned, e.g.
-  | Name | Contribution |
-  |---|---|
-  | ... | Backend & AI workflow |
-  | ... | Frontend & design |
--->
-
-| Name | Contribution |
-|---|---|
-| _Add name_ | _Add contribution_ |
-| _Add name_ | _Add contribution_ |
+> Folder names can vary slightly with the current implementation; the structure above reflects the main responsibilities of the project.
 
 ---
 
-<p align="center">Built for GitLab's release-driven documentation workflow.</p>
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd gitlab-ai-content-engine
+```
+
+### 2. Create the backend environment
+
+Create and activate a Python virtual environment for the backend.
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install backend dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure environment variables
+
+Create a `.env` file from the provided example:
+
+```bash
+cp .env.example .env
+```
+
+Add the required values for the project's LLM and database configuration.
+
+**Do not commit `.env` or API keys to GitHub.**
+
+### 5. Start the backend
+
+```bash
+python3 -m uvicorn main:app --reload
+```
+### 6. Start the frontend
+
+Open a new terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+---
+
+## Configuration
+
+Create a local `.env` file using `.env.example`.
+
+| Variable | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | Gemini API key used by the AI workflow |
+| `GOOGLE_API_KEY` | Google API key where required by the configured AI services |
+| `DATABASE_URL` | PostgreSQL / Supabase connection URL |
+| `GITLAB_URL` | GitLab instance URL, for example `https://gitlab.com` |
+| `GITLAB_TOKEN` | GitLab personal/project access token used for GitLab API access |
+| `SMTP_HOST` | SMTP server hostname used for email delivery |
+| `SMTP_PORT` | SMTP server port |
+| `SMTP_USERNAME` | SMTP account username |
+| `SMTP_PASSWORD` | SMTP account/app password |
+| `SMTP_FROM` | Sender address used for application emails |
+
+### Security
+
+Keep real credentials only in `.env` or the deployment platform's secret manager.
+
+**Never commit:**
+
+- API keys
+- Database passwords
+- GitLab tokens
+- SMTP passwords
+- Production `.env` files
+
+The `.env.example` file should contain variable names and safe placeholders only.
+
+---
+
+## Core Workflow in the Application
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Application
+    participant API as Backend
+    participant R as Retrieval
+    participant AI as Agent Workflow
+    participant DB as Database
+
+    User->>UI: Submit content request + sources
+    UI->>API: Create content job
+    API->>R: Prepare relevant context
+    R-->>API: Retrieved context
+    API->>AI: Start workflow
+    AI->>AI: Read → Draft → Review → Refine
+    AI-->>API: Draft + review signals
+    API->>DB: Save draft/version
+    API-->>UI: Show review-ready draft
+    User->>UI: Review / request changes
+    UI->>API: Approve or revise
+    API->>DB: Save decision
+```
+
+---
+
+## Source Grounding & Human Review
+
+A central design principle is that generated content should remain connected to the supplied technical context.
+
+The workflow therefore separates:
+
+**source/context preparation → generation → technical checking → refinement → human approval**
+
+This helps reduce unsupported claims and makes it easier for a reviewer to understand where the generated content came from.
+
+AI generation is not treated as the final publishing decision.
+
+---
+
+## Example Use Case
+
+### From code change to release documentation
+
+```text
+Code change / release context
+            ↓
+      Context preparation
+            ↓
+       Draft generation
+            ↓
+     Technical validation
+            ↓
+      Tone / structure
+            ↓
+        Human review
+            ↓
+      Approved content
+```
+
+A team can therefore start with technical information that already exists and use the engine to prepare a documentation draft rather than writing the entire document manually from scratch.
+
+---
+
+## Screenshots
+
+### 1. Application Dashboard
+[image]
+
+### 2. Content Intake
+[image]
+
+### 3. AI Content Workflow
+[image]
+
+### 4. Generated Documentation
+[image]
+
+### 5. Human Review
+[image]
+
+---
+
+## Development Notes
+
+The project is organized around a clear separation of responsibilities:
+
+- **Frontend** handles the user experience.
+- **Backend** manages requests, data, and orchestration.
+- **Agents** handle specialized content tasks.
+- **Retrieval** supplies relevant existing knowledge.
+- **Database** stores application state and versions.
+- **Human review** controls the final approval step.
+
+This separation makes the workflow easier to test, debug, and extend.
+
+---
+
+## Project Status
+
+🚧 **Active development**
+
+The project is being developed as a multi-agent AI documentation workflow with source ingestion, retrieval, content generation, technical review, refinement, and human approval.
+
+---
+
+## Contributors ⭐
+
+This project was developed collaboratively by:
+
+| Contributor | Role / Contribution |
+|---|---|
+| Himanshu Shende | Project Development |
+| Himanshu Gupta | Project Development |
+| Aparna Nale | Project Development |
+| Mrunali Wadi | Project Development |
+| Surya Rohila | Project Development |
+| Darshan Mathpal | Project Development |
+
+All contributors participated in the development, testing, documentation, and refinement of the project.
+
+---
+
+<p align="center">
+  <strong>Technical Change → Context → AI Workflow → Human Review → Documentation</strong>
+</p>
