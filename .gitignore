@@ -1,27 +1,17 @@
-# Virtual Environments
-.venv/
+
 venv/
-Backend/.venv/
-backend/.venv/
-**/__pycache__/
-*.pyc
-
-# Node / Frontend Dependencies
 node_modules/
-Frontend/node_modules/
-frontend/node_modules/
-**/node_modules/
-
-# Build Outputs
-.next/
-Frontend/.next/
-frontend/.next/
-dist/
-build/
-
-# Secrets & Environment Files
 .env
 .env.local
-*.env
-Backend/.env
-Frontend/.env.local
+__pycache__/
+.next/
+*.pyc
+
+# Logs
+Backend/audit.log
+
+# Chroma Database
+Backend/chroma_data/
+# Chroma / SQLite databases
+Backend/test_chroma/
+*.sqlite3
