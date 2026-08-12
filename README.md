@@ -460,19 +460,25 @@ A team can therefore start with technical information that already exists and us
 ## Screenshots
 
 ### 1. Application Dashboard
-[image]
+<img width="1831" height="875" alt="Screenshot 2026-08-12 204455" src="https://github.com/user-attachments/assets/8489eeaa-eaee-45f7-9dc5-a340c3e0768e" />
+
 
 ### 2. Content Intake
-[image]
+<img width="1518" height="881" alt="image" src="https://github.com/user-attachments/assets/19bdd259-09f4-49b1-a4c0-4934fe55921e" />
+
+
 
 ### 3. AI Content Workflow
-[image]
+<img width="1454" height="866" alt="image" src="https://github.com/user-attachments/assets/dd855453-ec46-4e0a-94a7-de991c2f16d1" />
+
 
 ### 4. Generated Documentation
-[image]
+<img width="1499" height="876" alt="image" src="https://github.com/user-attachments/assets/c143a955-588e-4cdb-835b-0f83f25e3518" />
+
 
 ### 5. Human Review
-[image]
+<img width="1447" height="853" alt="image" src="https://github.com/user-attachments/assets/c0ff03c6-e8e1-49b4-a9a2-8d12d795c820" />
+
 
 ---
 
