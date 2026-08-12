@@ -15,3 +15,4 @@ Backend/chroma_data/
 # Chroma / SQLite databases
 Backend/test_chroma/
 *.sqlite3
+.venv/
