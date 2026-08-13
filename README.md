@@ -2,6 +2,9 @@
 
 > Turn technical changes into source-grounded, review-ready documentation with a multi-agent AI workflow.
 
+🚀 **[View Live Application](https://git-lab-ai-content-and-documentatio-seven.vercel.app/)**
+
+---
 ## Overview
 
 The **GitLab AI Content & Documentation Engine** helps teams transform technical inputs such as code changes, release notes, API specifications, issue context, and existing documentation into structured content drafts.
@@ -246,18 +249,19 @@ flowchart TD
 
 ## Tech Stack
 
-| Layer | Technology |
+| Layer | Tools |
 |---|---|
 | **Backend API** | FastAPI |
 | **AI Orchestration** | CrewAI |
 | **LLM** | Gemini |
-| **Retrieval / Vector Store** | Chroma |
+| **Retrieval / Vector Store** | ChromaDB |
 | **Operational Database** | PostgreSQL / Supabase |
-| **ORM / Database Access** | SQLAlchemy |
-| **Configuration** | Python `.env` configuration |
-| **Frontend** | Project web interface |
-
-> The exact frontend/deployment configuration can vary with the environment. Backend and AI components above reflect the project's implementation direction.
+| **Database Access** | SQLAlchemy |
+| **GitLab Integration** | python-gitlab |
+| **Frontend Framework** | Next.js 14, React 18 |
+| **Styling** | Tailwind CSS |
+| **UI & Animation** | Framer Motion, Lucide React, React Icons |
+| **Data Visualization** | Recharts |
 
 ---
 
@@ -268,41 +272,41 @@ The repository is organized around the major application responsibilities rather
 ```text
 gitlab-ai-content-engine/
 │
-├── backend/
-│   ├── agents/
-│   │   └── crew.py              # Multi-agent workflow
-│   ├── retrieval/
-│   │   └── chroma_store.py      # Vector retrieval
-│   ├── auth/                    # Authentication-related logic
-│   ├── database/                # Database configuration / models
-│   ├── services/                # Application services
-│   ├── chroma_data/             # Retrieval data where used
-│   ├── main.py                  # FastAPI application entry point
-│   ├── models.py                # Application models
-│   └── requirements.txt         # Backend dependencies
+├── 🧠 backend/                    # AI & API layer
+│   ├── 🤖 agents/
+│   │   └── crew.py                # Multi-agent workflow
+│   │
+│   ├── 🔎 retrieval/
+│   │   └── chroma_store.py        # Knowledge retrieval
+│   │
+│   ├── 🔐 auth/                   # Authentication
+│   ├── 🗄️ database/               # Database models & configuration
+│   ├── ⚙️ services/               # Application services
+│   ├── 📚 chroma_data/             # Knowledge-base data
+│   │
+│   ├── main.py                    # FastAPI entry point
+│   ├── models.py                  # Application models
+│   └── requirements.txt           # Backend dependencies
 │
-├── frontend/
-│   └── ...                      # Web application
+├── 🎨 frontend/                   # Web application
 │
-├── data/
-│   ├── sample_inputs/           # Example technical inputs
-│   ├── sample_docs/             # Example documentation
-│   ├── style_guides/            # Writing/style context
-│   └── content_templates/       # Content templates
+├── 📦 data/                       # Project knowledge & examples
+│   ├── 📥 sample_inputs/          # Example technical inputs
+│   ├── 📄 sample_docs/            # Example documentation
+│   ├── ✍️ style_guides/            # Writing guidelines
+│   └── 🧩 content_templates/      # Documentation templates
 │
-├── tests/
-│   ├── functional_tests/
-│   ├── ai_output_tests/
-│   └── edge_cases/
+├── 🧪 tests/                      # Test suite
+│   ├── functional_tests/          # Functional testing
+│   ├── ai_output_tests/           # AI output validation
+│   └── edge_cases/                # Edge-case testing
 │
-├── docs/
-│   └── readme_assets/            # README diagrams
+├── 📖 docs/                       # Documentation assets
+│   └── readme_assets/             # README diagrams & images
 │
-├── .env.example
-└── README.md
+├── 🔑 .env.example                # Environment template
+└── 📘 README.md                   # Project documentation
 ```
-
-> Folder names can vary slightly with the current implementation; the structure above reflects the main responsibilities of the project.
 
 ---
 
@@ -339,24 +343,61 @@ Create a `.env` file from the provided example:
 cp .env.example .env
 ```
 
-Add the required values for the project's LLM and database configuration.
+Configure the required LLM, GitLab, email, and database variables.
 
-**Do not commit `.env` or API keys to GitHub.**
+**Do not commit .env, API keys, passwords, or access tokens to GitHub.**
 
-### 5. Start the backend
+### 5. Index the knowledge base
+
+Prepare the project knowledge for retrieval:
+
+```bash
+python -m retrieval.ingest_knowledge
+```
+
+### 6. Start the Backend
+
+Start the FastAPI backend from the `backend` directory:
 
 ```bash
 python3 -m uvicorn main:app --reload
 ```
-### 6. Start the frontend
 
-Open a new terminal:
+### 7. Start the Frontend
+
+Open a **new terminal** from the project root and start the frontend:
 
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+> If the frontend dependencies have already been installed, you can skip `npm install` and run `npm run dev`.
+
+---
+
+## Running the Application
+
+With both services running:
+
+```text
+Frontend
+   │
+   │  HTTP Requests
+   ▼
+FastAPI Backend
+   │
+   ├── AI Agents
+   ├── Chroma Retrieval
+   ├── Supabase / PostgreSQL
+   └── GitLab Integration
+```
+
+Open the **frontend** to use the application.
+
+The FastAPI documentation can be used to inspect and test the backend API endpoints when running the project locally.
+
 ---
 
 ## Configuration
@@ -368,13 +409,28 @@ Create a local `.env` file using `.env.example`.
 | `GEMINI_API_KEY` | Gemini API key used by the AI workflow |
 | `GOOGLE_API_KEY` | Google API key where required by the configured AI services |
 | `DATABASE_URL` | PostgreSQL / Supabase connection URL |
-| `GITLAB_URL` | GitLab instance URL, for example `https://gitlab.com` |
+| `GITLAB_URL` | GitLab API base URL, for example `https://gitlab.com/api/v4` |
 | `GITLAB_TOKEN` | GitLab personal/project access token used for GitLab API access |
-| `SMTP_HOST` | SMTP server hostname used for email delivery |
-| `SMTP_PORT` | SMTP server port |
-| `SMTP_USERNAME` | SMTP account username |
-| `SMTP_PASSWORD` | SMTP account/app password |
-| `SMTP_FROM` | Sender address used for application emails |
+| `BREVO_API_KEY` | Brevo API key used for transactional email delivery |
+| `BREVO_SENDER_EMAIL` | Verified sender email address used for application emails |
+| `FRONTEND_URL` | Frontend URL used when generating password-reset links |
+
+### Email & Authentication
+
+The application uses Brevo for transactional email delivery.
+
+Email functionality includes:
+- Signup verification codes
+- Password reset emails
+- Password reset links
+
+For the live application, email delivery is configured through Brevo using a verified sender email address.
+
+For local development, configure:
+- `BREVO_API_KEY`
+- `BREVO_SENDER_EMAIL`
+
+For security, real API keys and credentials must not be committed to GitHub.
 
 ### Security
 
@@ -385,7 +441,7 @@ Keep real credentials only in `.env` or the deployment platform's secret manager
 - API keys
 - Database passwords
 - GitLab tokens
-- SMTP passwords
+- Brevo API keys
 - Production `.env` files
 
 The `.env.example` file should contain variable names and safe placeholders only.
@@ -433,75 +489,29 @@ AI generation is not treated as the final publishing decision.
 
 ---
 
-## Example Use Case
-
-### From code change to release documentation
-
-```text
-Code change / release context
-            ↓
-      Context preparation
-            ↓
-       Draft generation
-            ↓
-     Technical validation
-            ↓
-      Tone / structure
-            ↓
-        Human review
-            ↓
-      Approved content
-```
-
-A team can therefore start with technical information that already exists and use the engine to prepare a documentation draft rather than writing the entire document manually from scratch.
-
----
-
 ## Screenshots
 
-### 1. Application Dashboard
-<img width="1831" height="875" alt="Screenshot 2026-08-12 204455" src="https://github.com/user-attachments/assets/8489eeaa-eaee-45f7-9dc5-a340c3e0768e" />
+### 1. Home / Product Overview
+![alt text](<Screenshot 2026-08-12 204455.png>)
 
+### 2. Application Dashboard
+![alt text](<Screenshot 2026-08-12 204455-1.png>)
 
-### 2. Content Intake
-<img width="1518" height="881" alt="image" src="https://github.com/user-attachments/assets/19bdd259-09f4-49b1-a4c0-4934fe55921e" />
+### 3. Generate Documentation
+![alt text](<Screenshot 2026-08-12 223725.png>)
 
+### 4. Context Preview / Source Grounding
+![alt text](image-1.png)
 
-
-### 3. AI Content Workflow
-<img width="1454" height="866" alt="image" src="https://github.com/user-attachments/assets/dd855453-ec46-4e0a-94a7-de991c2f16d1" />
-
-
-### 4. Generated Documentation
-<img width="1499" height="876" alt="image" src="https://github.com/user-attachments/assets/c143a955-588e-4cdb-835b-0f83f25e3518" />
-
-
-### 5. Human Review
-<img width="1447" height="853" alt="image" src="https://github.com/user-attachments/assets/c0ff03c6-e8e1-49b4-a9a2-8d12d795c820" />
-
-
----
-
-## Development Notes
-
-The project is organized around a clear separation of responsibilities:
-
-- **Frontend** handles the user experience.
-- **Backend** manages requests, data, and orchestration.
-- **Agents** handle specialized content tasks.
-- **Retrieval** supplies relevant existing knowledge.
-- **Database** stores application state and versions.
-- **Human review** controls the final approval step.
-
-This separation makes the workflow easier to test, debug, and extend.
-
+### 5. Generated Documentation / Release Notes
+![alt text](image-2.png)
 ---
 
 ## Project Status
 
-🚧 **Active development**
+🚀 **Deployed**
 
-The project is being developed as a multi-agent AI documentation workflow with source ingestion, retrieval, content generation, technical review, refinement, and human approval.
+The application is deployed and available through the live application link above.
 
 ---
 
@@ -514,9 +524,9 @@ This project was developed collaboratively by:
 | Himanshu Shende | Project Development |
 | Himanshu Gupta | Project Development |
 | Aparna Nale | Project Development |
-| Mrunali Wadi | Project Development |
+| Darshan Mathpal| Project Development |
 | Surya Rohila | Project Development |
-| Darshan Mathpal | Project Development |
+| Mrunali Wadi | Project Development |
 
 All contributors participated in the development, testing, documentation, and refinement of the project.
 
