@@ -84,10 +84,17 @@ context_builder = ContextBuilder()
 # (Vercel URL) se aane wali requests CORS error de rahi thi.
 # Ab FRONTEND_ORIGINS env var se control hota hai, comma-separated URLs.
 # Local development ke liye default localhost hi rahega agar env var set na ho.
-frontend_origins = os.getenv(
-    "FRONTEND_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000",
-).split(",")
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000"
+    ).split(",")
+    if origin.strip()
+]
+
+if "https://git-lab-ai-content-documentatio-seven.vercel.app" not in frontend_origins:
+    frontend_origins.append("https://git-lab-ai-content-documentatio-seven.vercel.app")
 
 app.add_middleware(
     CORSMiddleware,
