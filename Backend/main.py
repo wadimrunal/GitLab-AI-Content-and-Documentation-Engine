@@ -93,8 +93,8 @@ frontend_origins = [
     if origin.strip()
 ]
 
-if "https://git-lab-ai-content-documentatio-seven.vercel.app" not in frontend_origins:
-    frontend_origins.append("https://git-lab-ai-content-documentatio-seven.vercel.app")
+if "https://git-lab-ai-content-and-documentatio-seven.vercel.app" not in frontend_origins:
+    frontend_origins.append("https://git-lab-ai-content-and-documentatio-seven.vercel.app")
 
 app.add_middleware(
     CORSMiddleware,
