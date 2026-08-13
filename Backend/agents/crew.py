@@ -36,7 +36,6 @@ from services.context_builder import ContextBuilder
 
 load_dotenv()
 
-
 def get_llm() -> LLM:
     """
     Central place to configure which LLM the whole system uses.
@@ -44,11 +43,10 @@ def get_llm() -> LLM:
     Using Gemini's free tier is a good default for a student project.
     """
     return LLM(
-        model="gemini/gemini-flash-latest",
+        model="gemini/gemini-3.5-flash-lite",
         api_key=os.getenv("GEMINI_API_KEY"),
         temperature=0.4,
     )
-
 
 def build_agents() -> dict:
     llm = get_llm()
