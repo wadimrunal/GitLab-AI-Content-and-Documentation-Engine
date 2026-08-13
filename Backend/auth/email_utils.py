@@ -1,51 +1,52 @@
 """
 auth/email_utils.py
 ---------------------
-Sends the signup verification code by email.
+Sends the signup verification code by email, via Brevo's HTTPS API.
 
 CONFIGURING REAL EMAIL DELIVERY:
-Add these to backend/.env:
-    SMTP_HOST=smtp.gmail.com
-    SMTP_PORT=587
-    SMTP_USERNAME=you@gmail.com
-    SMTP_PASSWORD=your-app-password      (Gmail: use an "App Password", not your normal password)
-    SMTP_FROM=you@gmail.com
+Add these to Render's Environment tab (or backend/.env for local dev):
+    BREVO_API_KEY=your-brevo-api-key
+    BREVO_SENDER_EMAIL=your-verified-sender@email.com
 
-WITHOUT SMTP CONFIGURED (local dev default):
+WITHOUT BREVO_API_KEY CONFIGURED (local dev default):
 The code is printed to the backend console and written to audit.log
 instead of emailed, so you can still test the signup flow without
-setting up a mail server. Look for a line like:
+setting up email. Look for a line like:
     [DEV EMAIL] Verification code for someone@example.com: 123456
 """
 
 import os
-import smtplib
-from email.mime.text import MIMEText
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 from database.audit_log import log_event
 
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-SMTP_FROM = os.getenv("SMTP_FROM", SMTP_USERNAME)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
 
 
 def send_verification_code(email: str, code: str) -> None:
-    if not (SMTP_HOST and SMTP_USERNAME and SMTP_PASSWORD):
-        # Dev fallback: no mail server configured, so just log it.
+    if not (BREVO_API_KEY and BREVO_SENDER_EMAIL):
+        # Dev fallback: no mail service configured, so just log it.
         print(f"[DEV EMAIL] Verification code for {email}: {code}")
         log_event("verification_code_logged_dev_mode", job_id=None, email=email)
         return
 
-    message = MIMEText(
-        f"Your verification code is: {code}\n\nThis code expires in 15 minutes."
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = BREVO_API_KEY
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(configuration)
     )
-    message["Subject"] = "Your verification code"
-    message["From"] = SMTP_FROM
-    message["To"] = email
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USERNAME, SMTP_PASSWORD)
-        server.sendmail(SMTP_FROM, [email], message.as_string())
+    send_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": email}],
+        sender={"email": BREVO_SENDER_EMAIL},
+        subject="Your verification code",
+        text_content=f"Your verification code is: {code}\n\nThis code expires in 15 minutes.",
+    )
+
+    try:
+        api_instance.send_transac_email(send_email)
+        print(f"SUCCESS: Verification code sent to {email}")
+    except ApiException as e:
+        print(f"FAILED to send email: {e}")
