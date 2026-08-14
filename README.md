@@ -492,19 +492,24 @@ AI generation is not treated as the final publishing decision.
 ## Screenshots
 
 ### 1. Home / Product Overview
-![alt text](<Screenshot 2026-08-12 204455.png>)
+<img width="1831" height="875" alt="Screenshot 2026-08-12 204455" src="https://github.com/user-attachments/assets/83225e73-6431-46ac-96bd-e8a42e3c0421" />
+
 
 ### 2. Application Dashboard
-![alt text](<Screenshot 2026-08-12 204455-1.png>)
+<img width="1518" height="881" alt="Screenshot 2026-08-12 224404" src="https://github.com/user-attachments/assets/5794209e-3387-4681-8398-82062a9a3567" />
+
 
 ### 3. Generate Documentation
-![alt text](<Screenshot 2026-08-12 223725.png>)
+<img width="1752" height="903" alt="Screenshot 2026-08-12 223725" src="https://github.com/user-attachments/assets/1f97a290-af1d-4190-b0fe-cda386e5dc6e" />
+
 
 ### 4. Context Preview / Source Grounding
-![alt text](image-1.png)
+<img width="1454" height="866" alt="Screenshot 2026-08-12 224600" src="https://github.com/user-attachments/assets/62860206-51d4-47df-a9af-4cbedf6d463c" />
+
 
 ### 5. Generated Documentation / Release Notes
-![alt text](image-2.png)
+<img width="1447" height="853" alt="Screenshot 2026-08-12 231003" src="https://github.com/user-attachments/assets/ef2f5e8d-e4e4-49d4-8574-363036cf2f0a" />
+
 ---
 
 ## Project Status
